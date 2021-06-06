@@ -5,9 +5,11 @@
 package it.polito.tdp.PremierLeague;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import it.polito.tdp.PremierLeague.model.Model;
+import it.polito.tdp.PremierLeague.model.Team;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -17,7 +19,7 @@ import javafx.scene.control.TextField;
 
 public class FXMLController {
 	
-	private Model model;
+	private Model model = new Model();
 
     @FXML // ResourceBundle that was given to the FXMLLoader
     private ResourceBundle resources;
@@ -35,7 +37,7 @@ public class FXMLController {
     private Button btnSimula; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbSquadra"
-    private ComboBox<?> cmbSquadra; // Value injected by FXMLLoader
+    private ComboBox<Team> cmbSquadra; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtN"
     private TextField txtN; // Value injected by FXMLLoader
@@ -48,17 +50,53 @@ public class FXMLController {
 
     @FXML
     void doClassifica(ActionEvent event) {
-
+    	Team teamScelto = this.cmbSquadra.getValue();
+    	if(teamScelto == null) {
+    		this.txtResult.setText("Devi Inserire un team dall'elenco!");
+    		return;
+    	}
+    	
+    	String risultato = "\nSquadre peggiori di "+teamScelto.getName()+":\n\n";
+    	
+    	for(Team peggiore : this.model.getPeggiori(teamScelto).keySet()) {
+    		risultato += peggiore.getName()+" (" +this.model.getPeggiori(teamScelto).get(peggiore) +")\n";
+    	}
+    	
+    	risultato += "\n"+"Squadre migliori di "+teamScelto.getName()+":\n\n";
+    	
+    	for(Team migliore : this.model.getMigliori(teamScelto).keySet()) {
+    		risultato += migliore.getName()+" (" +this.model.getMigliori(teamScelto).get(migliore) +")\n";
+    	}
+    	
+    	this.txtResult.appendText(risultato);
     }
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
-
+    	this.model.creaGrafo();
+    	this.cmbSquadra.getItems().addAll(this.model.getTeams());
+    	
+    	this.txtResult.setText("Grafo creato!\n\n" +this.model.getNumeroVertici() +this.model.getNumeroArchi());
     }
 
     @FXML
     void doSimula(ActionEvent event) {
-
+    	String Nstring = this.txtN.getText();
+    	String XString = this.txtX.getText();
+    	
+    	int N=0;
+    	int X=0;
+    	
+    	try {
+    		N = Integer.parseInt(Nstring);
+    		X = Integer.parseInt(XString);
+    	}
+    	catch(NumberFormatException nbe) {
+    		this.txtResult.setText("Devi inserire due valori interi N ed X!");
+    		return;
+    	}
+    	
+    	this.txtResult.appendText("\n\n"+this.model.simula(N, X));
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
